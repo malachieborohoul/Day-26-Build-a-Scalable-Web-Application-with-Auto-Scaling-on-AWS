@@ -12,11 +12,10 @@ provider "aws" {
 #    vpc_id = data.aws_vpc.default.id
 # }
 
-# Appel du module ASG
+
 module "asg" {
   source         = "../../modules/asg"
-  ami            = var.ami
-  instance_type  = var.instance_type
+ 
   cluster_name   = var.cluster_name
   min_size       = var.min_size
   max_size       = var.max_size
@@ -24,11 +23,21 @@ module "asg" {
   custom_tags    = var.custom_tags
   db_remote_state_bucket = var.db_remote_state_bucket
   db_remote_state_key = var.db_remote_state_key
-  
+  aws_launch_configuration_name = module.ec2.aws_launch_configuration_name
 
 }
 
-# Appel du module ELB
+module "ec2" {
+  source          = "../../modules/ec2"
+  ami            = var.ami
+  instance_type  = var.instance_type
+  cluster_name   = var.cluster_name
+
+
+}
+
+
+
 module "elb" {
   source          = "../../modules/elb"
   cluster_name    = var.cluster_name

@@ -18,11 +18,6 @@ variable "db_remote_state_key" {
   type        = string
 }
 
-variable "instance_type" {
-  description = "The type of EC2 Instances to run (e.g. t2.micro)"
-  type        = string
-}
-
 variable "min_size" {
   description = "The minimum number of EC2 Instances in the ASG"
   type        = number
@@ -38,16 +33,14 @@ variable "enable_autoscaling" {
   type        = bool
 }
 
+variable "aws_launch_configuration_name" {
+  description = "The name of aws_launch_configuration passed taken from ec2 modules"
+}
 # ---------------------------------------------------------------------------------------------------------------------
 # OPTIONAL PARAMETERS
 # These parameters have reasonable defaults.
 # ---------------------------------------------------------------------------------------------------------------------
 
-variable "ami" {
-  description = "The AMI to run in the cluster"
-  type        = string
-  default     = "ami-0fb653ca2d3203ac1"
-}
 
 variable "server_text" {
   description = "The text the web server should return"

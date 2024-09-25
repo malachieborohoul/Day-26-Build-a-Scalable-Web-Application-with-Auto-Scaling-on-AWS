@@ -1,27 +1,10 @@
-resource "aws_launch_configuration" "example" {
-  image_id        = var.ami
-  instance_type   = var.instance_type
-  security_groups = [aws_security_group.instance.id]
-
-  user_data = <<-EOF
-            #!/bin/bash
-            echo "Hello, World" > index.html
-            nohup busybox httpd -f -p ${var.server_port} &
-            EOF
-
-
-  # Required when using a launch configuration with an auto scaling group.
-  lifecycle {
-    create_before_destroy = true
-  }
-}
 
 resource "aws_autoscaling_group" "example" {
   # Explicitly depend on the launch configuration's name so each time it's
   # replaced, this ASG is also replaced
-  name = "${var.cluster_name}-${aws_launch_configuration.example.name}"
+  name = "${var.cluster_name}-${var.aws_launch_configuration_name}"
 
-  launch_configuration = aws_launch_configuration.example.name
+  launch_configuration = var.aws_launch_configuration_name
   vpc_zone_identifier  = data.aws_subnets.default.ids
   target_group_arns    = [aws_lb_target_group.asg.arn]
   health_check_type    = "ELB"
@@ -91,24 +74,5 @@ data "aws_subnets" "default" {
 
 
 
-resource "aws_security_group" "instance" {
-  name = "${var.cluster_name}-instance"
-}
 
-resource "aws_security_group_rule" "allow_server_http_inbound" {
-  type              = "ingress"
-  security_group_id = aws_security_group.instance.id
 
-  from_port   = var.server_port
-  to_port     = var.server_port
-  protocol    = local.tcp_protocol
-  cidr_blocks = local.all_ips
-}
-
-locals {
-  http_port    = 80
-  any_port     = 0
-  any_protocol = "-1"
-  tcp_protocol = "tcp"
-  all_ips      = ["0.0.0.0/0"]
-}
